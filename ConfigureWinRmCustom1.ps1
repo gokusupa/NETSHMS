@@ -6,14 +6,13 @@
 #  Arguments   : HostName, specifies the FQDN of machine or domain                                                           #
 #################################################################################################################################
 
-#param
-#(
+param
+(
 
-#    [Parameter(Mandatory = $true)]
-#    [string] $HostName
-#)
+    [Parameter(Mandatory = $true)]
+    [string] $HostName
+)
 
-$hostname = "vmworkubsghccmf4aze.canadaeast.cloudapp.azure.com"
 
 #################################################################################################################################
 #                                             Helper Functions                                                                  #
