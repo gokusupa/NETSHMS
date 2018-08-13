@@ -118,7 +118,42 @@ Configure-WinRMHttpsListener $HostName $port
 # Add firewall exception
 Add-FirewallException -port $winrmHttpsPort 
 
+Start-sleep 5
 
+try
+
+    {
+        $s = new-PSSession -ComputerName vmdc
+        Invoke-Command  -Session $s -ScriptBlock `
+                {
+                    $ErrorActionPreference = "stop"
+                     new-PSSession -ConnectionUri https://vmwork:5986 `
+                    -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck) `
+                    -Authentication Negotiate 
+                    $ErrorActionPreference = "continue"
+
+                } `
+                -ErrorAction stop
+                
+
+    }
+
+catch 
+
+{
+# The default MaxEnvelopeSizekb on Windows Server is 500 Kb which is very less. It needs to be at 8192 Kb. The small envelop size if not changed
+# results in WS-Management service responding with error that the request size exceeded the configured MaxEnvelopeSize quota.
+winrm set winrm/config '@{MaxEnvelopeSizekb = "8192"}'
+
+# Configure https listener
+Configure-WinRMHttpsListener $HostName $port 
+
+# Add firewall exception
+Add-FirewallException -port $winrmHttpsPort 
+
+
+
+}
 
 
 #################################################################################################################################
