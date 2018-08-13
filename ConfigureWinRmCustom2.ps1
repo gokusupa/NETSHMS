@@ -6,14 +6,13 @@
 #  Arguments   : HostName, specifies the FQDN of machine or domain                                                           #
 #################################################################################################################################
 
-#param
-#(
-#
- #   [Parameter(Mandatory = $true)]
-  #  [string] $HostName
-#)
+param
+(
 
- $HostName = "vmworkvf4a7kncw55vo.canadaeast.cloudapp.azure.com"
+   [Parameter(Mandatory = $true)]
+ [string] $HostName
+)
+
 #################################################################################################################################
 #                                             Helper Functions                                                                  #
 #################################################################################################################################
@@ -72,7 +71,7 @@ function Create-Certificate
         Write-Verbose "Negative" -Verbose
         Write-Verbose "Removing Negative cert and creating new one" -Verbose
         Get-childitem cert:\localmachine\my | ? {$_.Subject -like "CN=vmwork*"} | Remove-Item -Force -Confirm:$false
-             Write-Verbose "Creating new cert" -Verbose
+        Write-Verbose "Creating new cert" -Verbose
         $cert = New-SelfSignedCertificate -certstorelocation cert:\localmachine\my -dnsname $hostname 
         Write-Verbose $cert.Thumbprint -Verbose
         if(-not $cert.Thumbprint)
@@ -145,11 +144,6 @@ Configure-WinRMHttpsListener $HostName $port
 
 # Add firewall exception
 Add-FirewallException -port $winrmHttpsPort 
-
-#temppp
-
- Get-childitem cert:\localmachine\my | ? {$_.Subject -like "CN=vmwork*"} | Remove-Item -Force -Confirm:$false
-
 
 #################################################################################################################################
 #################################################################################################################################
