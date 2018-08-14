@@ -55,23 +55,12 @@ function Create-Certificate
         throw "Failed to create the test certificate."
     }
 
-    #Verify Serial is valid
-   $serial = Get-ChildItem -Path $cert.PSPath | select -ExpandProperty serialnumber
-   $serialconvert = [System.Numerics.BigInteger]::Parse("$($serial)", 'AllowHexSpecifier')
-   Write-Verbose "$serialconvert if first digit is 0-7 this is a positive, anything else is negative" -Verbose
-   
+  
+  #verify serial is good
+DO
 
-    if ($serialconvert -match "^[0-7]" )
-    {
-        Write-Verbose "Positive" -Verbose
-    }
+{
 
-    else
-    {
-        Write-Verbose "Negative" -Verbose
-        Write-Verbose "Removing Negative cert and creating new one" -Verbose
-        Get-childitem cert:\localmachine\my | ? {$_.Subject -like "CN=vmwork*"} | Remove-Item -Force -Confirm:$false
-        Write-Verbose "Creating new cert" -Verbose
         $cert = New-SelfSignedCertificate -certstorelocation cert:\localmachine\my -dnsname $hostname 
         Write-Verbose $cert.Thumbprint -Verbose
         if(-not $cert.Thumbprint)
@@ -80,12 +69,12 @@ function Create-Certificate
         }
         $thumbprint = $cert.Thumbprint
         return $thumbprint
+         Write-Verbose "Positive" -Verbose
 
-    }
 
-        $thumbprint = $cert.Thumbprint
-    return $thumbprint
+        
 
+} Until ($cert.SerialNumber -match "^[0-7]" -and $cert.SerialNumber -match "/^[0-9A-F]{8}([0-9A-F]{4}([0-9A-F]{20})?)?$/i" )
 
 }
 
